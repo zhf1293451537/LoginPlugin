@@ -17,9 +17,10 @@ var src = map[string]func(*gin.Engine) *gin.RouterGroup{
 
 func NewRouter() *gin.Engine {
 	r := gin.Default()
-	r.LoadHTMLGlob("template/**/*")
+	r.LoadHTMLGlob("template/*")
+	r.Static("/static", "./static")
 	// r.GET("/test", api.Test)
-	r.GET("/user", api.UserInterface)
+	r.GET("/login", api.UserInterface)
 	//验证码放在session中
 	v1 := r.Group("/auth").Use(middlewares.Session("topgoer"))
 	{

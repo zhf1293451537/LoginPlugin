@@ -14,7 +14,7 @@ import (
 )
 
 func UserInterface(c *gin.Context) {
-	c.HTML(http.StatusOK, "user/user.html", "")
+	c.HTML(http.StatusOK, "index.html", "")
 
 }
 func UserRegis(c *gin.Context) {
