@@ -1,0 +1,14 @@
+database:
+  host: 127.0.0.1
+  user: root
+  dbname: redis
+  pwd: 123456
+server:
+  host: 127.0.0.1
+  port: 8080
+setting:
+  loginType: token
+redis:
+  host: 127.0.0.1
+  port: 6379
+  pwd: 981225

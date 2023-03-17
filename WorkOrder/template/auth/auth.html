@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>验证码</title>
+</head>
+<body>
+<img src="/auth/captcha" onclick="this.src=this.src+'?v='+Math.random()"> <!-- 点击验证码图片相当于重新对captcha进行GET操作 random()的意义在于浏览器对图片有存储作用 -->
+</body>
+</html>
