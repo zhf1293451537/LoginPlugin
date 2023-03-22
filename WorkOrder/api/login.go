@@ -6,17 +6,12 @@ import (
 	"WorkOrder/services"
 	"WorkOrder/utils"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
-func UserInterface(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", "")
-
-}
 func UserRegis(c *gin.Context) {
 	info := services.UserLoginInfo{}
 	err := c.ShouldBind(&info)

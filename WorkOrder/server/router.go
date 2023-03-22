@@ -4,15 +4,16 @@ import (
 	api "WorkOrder/api"
 	"WorkOrder/conf"
 	"WorkOrder/middlewares"
+	router "WorkOrder/routers"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 var src = map[string]func(*gin.Engine) *gin.RouterGroup{
-	"session": SessionRouter,
-	"cookie":  CookieRouter,
-	"token":   TokenRouter,
+	"session": router.SessionRouter,
+	"cookie":  router.CookieRouter,
+	"token":   router.TokenRouter,
 }
 
 func NewRouter() *gin.Engine {
@@ -20,7 +21,8 @@ func NewRouter() *gin.Engine {
 	r.LoadHTMLGlob("template/*")
 	r.Static("/static", "./static")
 	// r.GET("/test", api.Test)
-	r.GET("/login", api.UserInterface)
+	r.GET("/login", func(ctx *gin.Context) { ctx.HTML(http.StatusOK, "index.html", "") })
+	r.GET("/regis", func(ctx *gin.Context) { ctx.HTML(http.StatusOK, "regis.html", "") })
 	//验证码放在session中
 	v1 := r.Group("/auth").Use(middlewares.Session("topgoer"))
 	{
