@@ -43,9 +43,11 @@ func Init() {
 		RedisPwd = Config.GetString("redis.pwd")
 	}
 	//数据库连接
-	fmt.Println("进行数据库连接")
+	fmt.Println("进行Redis数据库连接")
 	models.InitRedis(RedisHost+":"+RedisPort, RedisPwd)
-	fmt.Println("Token Redis connection")
+
+	fmt.Println("用户信息数据库mysql连接")
+	models.InitBlogMysql("root:123456@/userinfo?charset=utf8&parseTime=True&loc=Local")
 
 	// err := models.Database("")
 	// if err != nil {

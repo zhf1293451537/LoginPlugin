@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 var DB *gorm.DB
@@ -30,8 +31,8 @@ func InitRedis(addr string, pwd string) {
 	}
 }
 
-func InitMongoDB(connString string) error {
-	db, err := gorm.Open("mongodb", connString)
+func InitBlogMysql(connString string) error {
+	db, err := gorm.Open("mysql", connString)
 	db.LogMode(true)
 	if err != nil {
 		return err
@@ -39,10 +40,13 @@ func InitMongoDB(connString string) error {
 
 	db.DB().SetMaxIdleConns(20)
 	db.DB().SetMaxOpenConns(100)
-	db.DB().SetConnMaxLifetime(time.Second * 30)
+	db.DB().SetConnMaxLifetime(time.Second * 60)
 	DB = db
 	//数据迁移
-	// DB.AutoMigrate()
+	migration()
 
 	return nil
+}
+func migration() {
+	DB.AutoMigrate(&UserInfo{})
 }

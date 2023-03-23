@@ -13,15 +13,15 @@ import (
 )
 
 func UserRegis(c *gin.Context) {
-	info := services.UserLoginInfo{}
+	info := services.RegisInfo{}
 	err := c.ShouldBind(&info)
 	if err != nil {
 		log.Println("data bind error", err)
 		c.JSON(400, err)
 		return
 	}
-	err = models.RedisClient.Get(info.Username).Err()
-	if err == nil {
+	checkexists := info.CheckUsernameExists()
+	if checkexists {
 		log.Println("账户名已存在")
 		c.JSON(400, gin.H{
 			"msg": "账户名已存在",
@@ -36,11 +36,11 @@ func UserRegis(c *gin.Context) {
 		})
 		return
 	}
-	err = models.RedisClient.Set(info.Username, pwd, 0).Err()
+	err = info.RegisUser(pwd)
 	if err != nil {
-		log.Println("redis set error", err)
+		log.Println("User database set error", err)
 		c.JSON(400, gin.H{
-			"msg": "redis set error",
+			"msg": "user database set error",
 		})
 		return
 	}
@@ -106,6 +106,7 @@ func UserTokenlogin(c *gin.Context) {
 		c.JSON(401, err)
 		return
 	}
+	log.Println(info.Password, info.Username)
 	res, flag := info.Userverification()
 	if flag {
 		token, err := middlewares.GenerateToken(info.Username)
@@ -117,7 +118,6 @@ func UserTokenlogin(c *gin.Context) {
 		}
 		c.Header("jwt", token)
 		c.JSON(200, res)
-		c.String(200, "token 设置成功")
 		return
 	}
 	c.JSON(401, res)

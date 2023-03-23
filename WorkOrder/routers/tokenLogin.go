@@ -3,6 +3,7 @@ package router
 import (
 	api "WorkOrder/api"
 	"WorkOrder/middlewares"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,7 +13,8 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 	r.POST("/v3/user/login", api.UserTokenlogin)
 	u := r.Group("/v3", middlewares.AuthToken())
 	{
-		u.GET("/user/home", func(ctx *gin.Context) { ctx.JSON(200, gin.H{"msg": "home success"}) })
+		u.GET("/user/home", func(ctx *gin.Context) { ctx.HTML(http.StatusOK, "home.html", "") })
+
 	}
 	return u
 }

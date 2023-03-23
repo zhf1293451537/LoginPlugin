@@ -19,10 +19,15 @@ var src = map[string]func(*gin.Engine) *gin.RouterGroup{
 func NewRouter() *gin.Engine {
 	r := gin.Default()
 	r.LoadHTMLGlob("template/*")
-	r.Static("/static", "./static")
+	// r.Static("/static", "./static")
 	// r.GET("/test", api.Test)
-	r.GET("/login", func(ctx *gin.Context) { ctx.HTML(http.StatusOK, "index.html", "") })
+	//登陆界面
+	r.GET("/login", func(ctx *gin.Context) { ctx.HTML(http.StatusOK, "login.html", "") })
+	//注册界面
 	r.GET("/regis", func(ctx *gin.Context) { ctx.HTML(http.StatusOK, "regis.html", "") })
+	//账号注册
+	r.POST("/regis", api.UserRegis)
+
 	//验证码放在session中
 	v1 := r.Group("/auth").Use(middlewares.Session("topgoer"))
 	{
@@ -37,8 +42,7 @@ func NewRouter() *gin.Engine {
 			}
 		})
 	}
-	//账号注册
-	r.POST("user/regis", api.UserRegis)
+
 	//获取对应login方式的RouterGroup
 	_ = src[conf.LoginType](r)
 	{

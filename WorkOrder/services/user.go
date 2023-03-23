@@ -16,7 +16,9 @@ func (u *UserLoginInfo) Userverification() (*serializer.Response, bool) {
 	// name := "zhf"
 	// hashPass, _ := utils.EncryptPassword("123456") //模拟密码为前段md5加密后
 	// _ = models.RedisClient.Set(name, hashPass, 0).Err()
-	pwd, err := models.RedisClient.Get(u.Username).Result()
+	user := &models.UserInfo{Username: u.Username}
+	err := models.DB.Where("username = ?", user.Username).First(&user).Error
+	log.Println(user)
 	if err != nil {
 		log.Println("账户不存在")
 		return &serializer.Response{
@@ -25,7 +27,7 @@ func (u *UserLoginInfo) Userverification() (*serializer.Response, bool) {
 			Error:  "账户名或密码错误",
 		}, false
 	}
-	IsTrue := utils.EqualsPassword(u.Password, pwd)
+	IsTrue := utils.EqualsPassword(u.Password, user.Password)
 	if IsTrue {
 		return &serializer.Response{
 			Stauts: 20001,
