@@ -25,6 +25,11 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 		u.GET("/user/avatar", api.GetAvatar)
 		//修改用户头像
 		u.POST("/user/avatar", api.SetAvatar)
+
+		//博客文章操作
+		//博客发布
+		u.GET("/articles/create", func(c *gin.Context) {})
+		//博客查看
 		u.GET("/articles/:id/edit", func(c *gin.Context) {
 			id := c.Param("id")
 			article := "nil" + id //models.GetArticleByID(id)
@@ -36,6 +41,7 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 				"article": article,
 			})
 		})
+		//博客编辑
 		u.POST("/articles/:id/edit", func(c *gin.Context) {
 			// id := c.Param("id")
 			// title := c.PostForm("title")
@@ -54,6 +60,7 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 			// }
 			c.Redirect(http.StatusFound, "/articles")
 		})
+		//博客删除
 		u.POST("/articles/:id/delete", func(c *gin.Context) {
 			// id := c.Param("id")
 			// // err := models.DeleteArticle(id)
