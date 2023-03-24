@@ -27,7 +27,6 @@ func NewRouter() *gin.Engine {
 	r.GET("/regis", func(ctx *gin.Context) { ctx.HTML(http.StatusOK, "regis.html", "") })
 	//账号注册
 	r.POST("/regis", api.UserRegis)
-
 	//验证码放在session中
 	v1 := r.Group("/auth").Use(middlewares.Session("topgoer"))
 	{

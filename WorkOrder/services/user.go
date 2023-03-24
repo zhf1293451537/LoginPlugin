@@ -18,7 +18,7 @@ func (u *UserLoginInfo) Userverification() (*serializer.Response, bool) {
 	// _ = models.RedisClient.Set(name, hashPass, 0).Err()
 	user := &models.UserInfo{Username: u.Username}
 	err := models.DB.Where("username = ?", user.Username).First(&user).Error
-	log.Println(user)
+	// log.Println(user)
 	if err != nil {
 		log.Println("账户不存在")
 		return &serializer.Response{

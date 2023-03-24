@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const TokenExpireDuration = time.Second * 120
+const TokenExpireDuration = time.Hour * 2
 
 var Secret = []byte("Sett")
 
@@ -52,7 +52,7 @@ func AuthToken() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		} else {
-			errtemp := models.RedisClient.Get(myclaim.UserName).Err()
+			_, errtemp := models.RedisClient.HMGet(myclaim.UserName, "nickname").Result()
 			if errtemp != nil {
 				log.Println(errtemp)
 				ctx.JSON(401, gin.H{
@@ -62,8 +62,7 @@ func AuthToken() gin.HandlerFunc {
 				ctx.Abort()
 				return
 			}
-			log.Println("username : ", myclaim.UserName)
-			ctx.JSON(200, gin.H{"msg": "token auth success"})
+			log.Println("auth username : ", myclaim.UserName)
 			ctx.Next()
 			return
 		}

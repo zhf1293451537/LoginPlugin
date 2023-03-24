@@ -45,7 +45,8 @@
           if (xhr.status === 200) {
             const response = JSON.parse(xhr.responseText);
             console.log(response);
-            window.location.assign("/v3/user/home");
+            localStorage.setItem("token",xhr.getResponseHeader("jwt"))
+            window.location.assign("/temp");
             // 处理响应结果
           } else {
             console.error(xhr.statusText);

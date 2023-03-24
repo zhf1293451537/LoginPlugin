@@ -100,6 +100,7 @@ func UserSessionlogin(c *gin.Context) {
 
 func UserTokenlogin(c *gin.Context) {
 	info := services.UserLoginInfo{}
+	user := &models.UserInfo{}
 	err := c.ShouldBind(&info)
 	if err != nil {
 		log.Println(err)
@@ -115,7 +116,21 @@ func UserTokenlogin(c *gin.Context) {
 				"msg": "token生成发生错误",
 				"err": err.Error(),
 			})
+			return
 		}
+		result := models.DB.Where("username = ?", info.Username).Select("nick_name,avatar,profile").Find(&user)
+		if result.Error != nil {
+			c.JSON(401, gin.H{
+				"msg": "database error",
+				"err": err.Error(),
+			})
+			return
+		}
+		models.RedisClient.HMSet(info.Username, map[string]interface{}{
+			"nickname": user.NickName,
+			"avatar":   user.Avatar,
+			"profile":  user.Profile,
+		})
 		c.Header("jwt", token)
 		c.JSON(200, res)
 		return
