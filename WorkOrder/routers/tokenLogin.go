@@ -3,7 +3,9 @@ package router
 import (
 	api "WorkOrder/api"
 	"WorkOrder/middlewares"
+	"WorkOrder/models"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,8 +29,33 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 		u.POST("/user/avatar", api.SetAvatar)
 
 		//博客文章操作
+		//博客发布页面
+		u.GET("/articles/create", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "create_article.html", gin.H{})
+		})
 		//博客发布
-		u.GET("/articles/create", func(c *gin.Context) {})
+		u.POST("/articles/create", func(c *gin.Context) {
+			// 从表单中获取文章数据
+			title := c.PostForm("title")
+			content := c.PostForm("content")
+			author := c.PostForm("author")
+
+			// 创建新文章
+			article := models.Article{
+				Title:       title,
+				Content:     content,
+				Author:      author,
+				PublishDate: time.Now(),
+			}
+			err := article.Create()
+			if err != nil {
+				c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+
+			// 重定向到文章列表页面
+			c.Redirect(http.StatusFound, "/articles")
+		})
 		//博客查看
 		u.GET("/articles/:id/edit", func(c *gin.Context) {
 			id := c.Param("id")
