@@ -25,8 +25,47 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 		u.GET("/user/avatar", api.GetAvatar)
 		//修改用户头像
 		u.POST("/user/avatar", api.SetAvatar)
+		u.GET("/articles/:id/edit", func(c *gin.Context) {
+			id := c.Param("id")
+			article := "nil" + id //models.GetArticleByID(id)
+			// if err != nil {
+			// 	c.AbortWithError(http.StatusInternalServerError, err)
+			// 	return
+			// }
+			c.HTML(http.StatusOK, "edit_article.html", gin.H{
+				"article": article,
+			})
+		})
+		u.POST("/articles/:id/edit", func(c *gin.Context) {
+			// id := c.Param("id")
+			// title := c.PostForm("title")
+			// content := c.PostForm("content")
+			// author := c.PostForm("author")
+			// article := models.Article{
+			// 	ID: id,
+			// 	Title: title,
+			// 	Content: content,
+			// 	Author: author,
+			// }
+			// err := article.Update()
+			// if err != nil {
+			// 	c.AbortWithError(http.StatusInternalServerError, err)
+			// 	return
+			// }
+			c.Redirect(http.StatusFound, "/articles")
+		})
+		u.POST("/articles/:id/delete", func(c *gin.Context) {
+			// id := c.Param("id")
+			// // err := models.DeleteArticle(id)
+			// if err != nil {
+			// 	c.AbortWithError(http.StatusInternalServerError, err)
+			// 	return
+			// }
+			c.Redirect(http.StatusFound, "/articles")
+		})
 		/*
 		* 博客文章的发布、编辑、删除、查看等功能
+
 		* 博客文章的分类和标签管理
 		* 博客文章的搜索功能
 		* 博客文章的评论功能
