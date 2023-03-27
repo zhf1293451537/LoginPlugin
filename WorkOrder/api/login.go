@@ -126,6 +126,7 @@ func UserTokenlogin(c *gin.Context) {
 			})
 			return
 		}
+		//用户信息存入缓存
 		models.RedisClient.HMSet(info.Username, map[string]interface{}{
 			"nickname": user.NickName,
 			"avatar":   user.Avatar,

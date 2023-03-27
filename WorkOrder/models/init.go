@@ -48,5 +48,5 @@ func InitBlogMysql(connString string) error {
 	return nil
 }
 func migration() {
-	DB.AutoMigrate(&UserInfo{})
+	DB.AutoMigrate(&UserInfo{}, &Article{}, &Catagory{})
 }

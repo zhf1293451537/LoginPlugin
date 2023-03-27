@@ -19,10 +19,11 @@
         <tbody>
           {{range .articles}}
           <tr>
+            <td>{{.ID}}</td>
             <td>{{.Title}}</td>
             <td>{{.Author}}</td>
             <td>
-              <a href="/articles/{{.ID}}">查看</a>
+              <a href="/articles/{{.ID}}/edit">查看</a>
               <a href="/articles/{{.ID}}/edit">编辑</a>
               <form method="POST" action="/articles/{{.ID}}/delete" style="display: inline;">
                 <button type="submit" class="btn btn-link">删除</button>
@@ -32,7 +33,7 @@
           {{end}}
         </tbody>
       </table>
-      <a href="/articles/new" class="btn btn-primary">新建文章</a>
+      <a href="/articles/create" class="btn btn-primary">新建文章</a>
     </div>
   </body>
 </html>

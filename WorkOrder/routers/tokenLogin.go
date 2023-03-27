@@ -3,9 +3,7 @@ package router
 import (
 	api "WorkOrder/api"
 	"WorkOrder/middlewares"
-	"WorkOrder/models"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,82 +28,37 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 
 		//博客文章操作
 		//博客发布页面
-		u.GET("/articles/create", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "create_article.html", gin.H{})
-		})
+		u.GET("/articles/create", func(c *gin.Context) { c.HTML(http.StatusOK, "create_article.html", gin.H{}) })
 		//博客发布
-		u.POST("/articles/create", func(c *gin.Context) {
-			// 从表单中获取文章数据
-			title := c.PostForm("title")
-			content := c.PostForm("content")
-			author := c.PostForm("author")
-
-			// 创建新文章
-			article := models.Article{
-				Title:       title,
-				Content:     content,
-				Author:      author,
-				PublishDate: time.Now(),
-			}
-			err := article.Create()
-			if err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
-
-			// 重定向到文章列表页面
-			c.Redirect(http.StatusFound, "/articles")
-		})
+		u.POST("/articles/create", api.ArtPost)
 		//博客查看
-		u.GET("/articles/:id/edit", func(c *gin.Context) {
-			id := c.Param("id")
-			article := "nil" + id //models.GetArticleByID(id)
-			// if err != nil {
-			// 	c.AbortWithError(http.StatusInternalServerError, err)
-			// 	return
-			// }
-			c.HTML(http.StatusOK, "edit_article.html", gin.H{
-				"article": article,
-			})
-		})
+		u.GET("/articles/:id/edit", api.ArtGet)
 		//博客编辑
-		u.POST("/articles/:id/edit", func(c *gin.Context) {
-			// id := c.Param("id")
-			// title := c.PostForm("title")
-			// content := c.PostForm("content")
-			// author := c.PostForm("author")
-			// article := models.Article{
-			// 	ID: id,
-			// 	Title: title,
-			// 	Content: content,
-			// 	Author: author,
-			// }
-			// err := article.Update()
-			// if err != nil {
-			// 	c.AbortWithError(http.StatusInternalServerError, err)
-			// 	return
-			// }
-			c.Redirect(http.StatusFound, "/articles")
-		})
+		u.POST("/articles/:id/edit", api.AriFix)
 		//博客删除
-		u.POST("/articles/:id/delete", func(c *gin.Context) {
-			// id := c.Param("id")
-			// // err := models.DeleteArticle(id)
-			// if err != nil {
-			// 	c.AbortWithError(http.StatusInternalServerError, err)
-			// 	return
-			// }
-			c.Redirect(http.StatusFound, "/articles")
-		})
-		/*
-		* 博客文章的发布、编辑、删除、查看等功能
+		u.POST("/articles/:id/delete", api.ArtDelete)
+		//博客列表
+		u.GET("/articles", api.ArtList)
 
-		* 博客文章的分类和标签管理
-		* 博客文章的搜索功能
-		* 博客文章的评论功能
-		* 博客文章的点赞功能
-		* 管理员后台管理功能
-		 */
+		//博客文章的分类和标签管理
+		//获取分类下的所有文章列表
+		u.GET("/articles/cata/:catagory/list", api.GetListByCata)
+		//获取所有分类
+		u.GET("/articles/cata/list", api.GetAllCata)
+		//新增分类
+		u.POST("/articles/cata/create/", api.CataPost)
+		//编辑分类
+		u.POST("/articles/cata/edit/", api.CataEdit)
+		//删除分类
+		u.POST("/articles/cata/:catagory/delete", api.CataDelete)
+
+		//博客文章的搜索功能
+
+		//博客文章的评论功能
+
+		//博客文章的点赞功能
+
+		//管理员后台管理功能
 
 		/*
 			2. 高级功能
