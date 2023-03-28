@@ -34,27 +34,35 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 		//博客查看
 		u.GET("/articles/:id/edit", api.ArtGet)
 		//博客编辑
-		u.POST("/articles/:id/edit", api.AriFix)
+		u.POST("/articles/:id/edit", api.ArtFix)
 		//博客删除
 		u.POST("/articles/:id/delete", api.ArtDelete)
 		//博客列表
 		u.GET("/articles", api.ArtList)
 
 		//博客文章的分类和标签管理
-		//获取分类下的所有文章列表
-		u.GET("/articles/cata/:catagory/list", api.GetListByCata)
-		//获取所有分类
-		u.GET("/articles/cata/list", api.GetAllCata)
 		//新增分类
 		u.POST("/articles/cata/create/", api.CataPost)
 		//编辑分类
-		u.POST("/articles/cata/edit/", api.CataEdit)
+		u.POST("/articles/cata/:id/edit/", api.CataEdit)
+		//获取所有分类
+		u.GET("/articles/cata/list", api.GetAllCata)
 		//删除分类
-		u.POST("/articles/cata/:catagory/delete", api.CataDelete)
+		u.POST("/articles/cata/:id/delete", api.CataDelete)
+
+		//获取分类下的所有文章列表
+		u.GET("/articles/cata/:catagory/list", api.GetListByCata)
 
 		//博客文章的搜索功能
-
+		u.GET("/articles/search", api.Artsearch)
 		//博客文章的评论功能
+
+		// 查询评论列表
+		u.GET("/articles/:id/comments", api.GetComments)
+		// 创建新评论
+		u.POST("/articles/:id/comments", api.CreateComment)
+		// u.POST("/articles/:id/comment", api.AddComment)
+		// u.POST("/articles/:id/comment/:pid", api.AddComment)
 
 		//博客文章的点赞功能
 

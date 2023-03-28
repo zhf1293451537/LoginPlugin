@@ -1,0 +1,82 @@
+<ul id="comment-list" class="list-unstyled"></ul>
+
+<form id="comment-form">
+  <div class="form-group">
+    <label for="comment-name">Name</label>
+    <input type="text" class="form-control" id="comment-name" required>
+  </div>
+  <div class="form-group">
+    <label for="comment-content">Content</label>
+    <textarea class="form-control" id="comment-content" rows="3" required></textarea>
+  </div>
+  <div class="form-group">
+    <label for="comment-parent-id">Parent ID</label>
+    <input type="text" class="form-control" id="comment-parent-id">
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+<script>
+  function getComments(parentID) {
+    $.ajax({
+      url: "/comments",
+      data: {
+        parent_id: parentID
+      },
+      success: function(comments) {
+        var ul = $("<ul></ul>").addClass("list-unstyled");
+        for (var i = 0; i < comments.length; i++) {
+          var comment = comments[i];
+          var li = $("<li></li>").addClass("mb-3");
+          var div = $("<div></div>").addClass("border p-3");
+          div.append($("<h5></h5>").text(comment.name));
+          div.append($("<p></p>").text(comment.content));
+          li.append(div);
+          var subComments = getComments(comment._id);
+          if (subComments.length > 0) {
+            li.append(subComments);
+          }
+          ul.append(li);
+        }
+        return ul;
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        console.error(errorThrown);
+      }
+    });
+  }
+
+  $("#comment-list").append(getComments(null));
+
+  $("#comment-form").submit(function(event) {
+    event.preventDefault();
+    $.ajax({
+      url: "/comments",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({
+        name: $("#comment-name").val(),
+        content: $("#comment-content").val(),
+        parent_id: $("#comment-parent-id").val()
+      }),
+      success: function(comment) {
+        var li = $("<li></li>").addClass("mb-3");
+        var div = $("<div></div>").addClass("border p-3");
+        div.append($("<h5></h5>").text(comment.name));
+        div.append($("<p></p>").text(comment.content));
+        li.append(div);
+        var parentID = comment.parent_id == null ? null : comment.parent_id.$oid;
+        var subComments = getComments(parentID);
+        if (subComments.length > 0) {
+          li.append(subComments);
+        }
+        $("#comment-list").append(li);
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        console.error(errorThrown);
+      }
+    });
+  });
+</script>

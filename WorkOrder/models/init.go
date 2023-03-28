@@ -7,11 +7,57 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"labix.org/v2/mgo"
 )
 
 var DB *gorm.DB
 var RedisClient *redis.Client
+var Comments *mgo.Collection
 
+func InitMgo() {
+	session, err := mgo.Dial("mongodb://admin:123456localhost:27017")
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+
+	db := session.DB("blogdb")
+	// users := db.C("users")
+	Comments = db.C("comments")
+	// // 插入新用户
+	// user := User{
+	// 	ID:       bson.NewObjectId(),
+	// 	Name:     "Alice",
+	// 	Email:    "alice@example.com",
+	// 	Password: "password",
+	// }
+	// err = users.Insert(user)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// // 查询所有用户
+	// var allUsers []User
+	// err = users.Find(nil).All(&allUsers)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(allUsers)
+
+	// // 查询指定用户
+	// var oneUser User
+	// err = users.Find(bson.M{"email": "alice@example.com"}).One(&oneUser)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(oneUser)
+
+	// // 更新用户信息
+	// err = users.Update(bson.M{"email": "alice@example.com"}, bson.M{"$set": bson.M{"name": "Bob"}})
+	// if err != nil {
+	// 	panic(err)
+	// }
+}
 func InitRedis(addr string, pwd string) {
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr:        addr,

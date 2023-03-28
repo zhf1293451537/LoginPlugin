@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
 func ArtPost(c *gin.Context) {
@@ -55,7 +56,18 @@ func ArtGet(c *gin.Context) {
 	article, err := models.GetArticleByID(id)
 	if err != nil {
 		c.JSON(500, gin.H{
-			"msg": "database select error",
+			"msg": "article database select error",
+			"err": err,
+		})
+		// 	c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	cataname, err := models.GetCataByID(fmt.Sprint(article.Cataid))
+	if err == gorm.ErrRecordNotFound {
+		cataname = "分类已被删除请修改分类"
+	} else if err != nil {
+		c.JSON(500, gin.H{
+			"msg": "cataname database select error",
 			"err": err,
 		})
 		// 	c.AbortWithError(http.StatusInternalServerError, err)
@@ -63,19 +75,29 @@ func ArtGet(c *gin.Context) {
 	}
 	c.HTML(http.StatusOK, "edit_article.html", gin.H{
 		"article": article,
+		"name":    cataname,
 	})
 }
-func AriFix(c *gin.Context) {
+func ArtFix(c *gin.Context) {
 	id := c.Param("id")
 	title := c.PostForm("title")
 	content := c.PostForm("content")
 	author := c.PostForm("author")
+	cata := c.PostForm("catagory")
+	cataid, err := models.GetCataId(cata)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"err": err,
+			"msg": "cataid get fail",
+		})
+	}
 	article := models.Article{
 		Title:   title,
 		Content: content,
 		Author:  author,
+		Cataid:  cataid,
 	}
-	err := article.UpdateById(id)
+	err = article.UpdateById(id)
 	if err != nil {
 		log.Println("articles fix success")
 		// c.AbortWithError(http.StatusInternalServerError, err)
@@ -114,16 +136,38 @@ func ArtList(c *gin.Context) {
 	})
 }
 
+func Artsearch(c *gin.Context) {
+	// 获取用户输入的搜索关键字
+	keyword := c.Query("keyword")
+
+	// 在文章信息表中查询所有包含搜索关键字的文章
+	articles := &[]models.Article{}
+	if err := models.DB.Where("title LIKE ?", "%"+keyword+"%").Find(articles).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	// 将搜索结果返回给用户
+	c.HTML(200, "article_list.html", gin.H{
+		"articles": articles,
+	})
+}
+
 func GetListByCata(c *gin.Context) {
 	cata := c.Param("catagory")
 	result := &models.Catagory{}
-	err := models.DB.Table("catagory").Where("name = ?", cata).Select("id").Find(&result).Error
-	if err != nil {
+	err := models.DB.Table("catagories").Where("name = ?", cata).Select("id").Find(&result).Error
+	if err == gorm.ErrRecordNotFound {
+		//分类已被删除
+		c.JSON(500, "cata has deleted")
+		return
+	} else if err != nil {
 		c.JSON(500, "cata database error")
+		return
 	}
-	log.Println("catagory id is :", result.ID)
 	articles, err := models.GetArticleListByCata(fmt.Sprint(result.ID))
-	if err != nil {
+	if err == gorm.ErrRecordNotFound {
+		log.Println("art is not found")
+	} else if err != nil {
 		c.JSON(500, gin.H{
 			"msg": "cata list get error",
 			"err": err,
@@ -131,8 +175,9 @@ func GetListByCata(c *gin.Context) {
 		// c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.HTML(http.StatusOK, "article_list.html", gin.H{
+	c.HTML(http.StatusOK, "article_cata_list.html", gin.H{
 		"articles": articles,
+		"name":     cata,
 	})
 }
 
@@ -154,7 +199,7 @@ func GetAllCata(c *gin.Context) {
 func CataPost(c *gin.Context) {
 	// 从表单中获取分类数据
 	name := c.PostForm("name")
-	// 创建新文章
+	// 创建新分类
 	cata := models.Catagory{
 		Name: name,
 	}
@@ -167,17 +212,40 @@ func CataPost(c *gin.Context) {
 		// c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	log.Println("重定向到文章列表页面")
-	// 重定向到文章列表页面
+	log.Println("重定向到分类列表页面")
+	// 重定向到分类列表页面
 	c.JSON(200, gin.H{
 		"msg": "cata create success",
 	})
-	// c.Redirect(http.StatusFound, "/articles")
+	// c.Redirect(http.StatusFound, "/cata/list")
 }
 
 func CataDelete(c *gin.Context) {
-
+	id := c.Param("id")
+	err := models.DB.Table("catagories").Where("id = ?", id).Delete(&models.Catagory{}).Error
+	if err != nil {
+		c.JSON(500, gin.H{
+			"err": err,
+			"msg": "cata database error",
+		})
+	}
+	c.JSON(200, gin.H{
+		"msg": "cata delete success",
+	})
 }
 func CataEdit(c *gin.Context) {
+	id := c.Param("id")
+	name := c.PostForm("name")
+	cata := &models.Catagory{Name: name}
+	err := models.DB.Table("catagories").Where("id = ?", id).Update(cata).Error
+	if err != nil {
+		c.JSON(500, gin.H{
+			"err": err,
+			"msg": "cata database error",
+		})
+	}
+	c.JSON(200, gin.H{
+		"msg": "cata edit success",
+	})
 
 }
