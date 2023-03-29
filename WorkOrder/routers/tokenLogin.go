@@ -61,11 +61,10 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 		u.GET("/articles/:id/comments", api.GetComments)
 		// 创建新评论
 		u.POST("/articles/:id/comments", api.CreateComment)
-		// u.POST("/articles/:id/comment", api.AddComment)
-		// u.POST("/articles/:id/comment/:pid", api.AddComment)
 
 		//博客文章的点赞功能
-
+		u.POST("/articles/:id/likes", api.ArtLike)
+		u.DELETE("/articles/:id/likes", api.DisArtLike)
 		//管理员后台管理功能
 
 		/*

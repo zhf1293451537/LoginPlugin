@@ -1,14 +1,16 @@
 package models
 
 import (
-	"labix.org/v2/mgo/bson"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Comment struct {
-	ID        bson.ObjectId  `bson:"_id,omitempty"`
-	ParentID  *bson.ObjectId `bson:"parent_id,omitempty"`
-	ArticleID bson.ObjectId  `bson:"article_id"`
-	UserID    string         `bson:"userid"`
-	Content   string         `bson:"content"`
-	// Create_At time.Time
+	ID        primitive.ObjectID  `bson:"_id,omitempty" json:"id,omitempty"`
+	ArticleID primitive.ObjectID  `bson:"article_id,omitempty" json:"article_id,omitempty"`
+	UserID    primitive.ObjectID  `bson:"user_id,omitempty" json:"user_id,omitempty"`
+	ParentID  *primitive.ObjectID `bson:"parent_id,omitempty" json:"parent_id,omitempty"`
+	Content   string              `bson:"content,omitempty" json:"content,omitempty"`
+	CreatedAt time.Time           `bson:"created_at,omitempty" json:"created_at,omitempty"`
 }

@@ -1,62 +1,46 @@
 package models
 
 import (
+	"context"
 	"log"
 	"time"
 
 	"github.com/go-redis/redis"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"labix.org/v2/mgo"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var DB *gorm.DB
 var RedisClient *redis.Client
-var Comments *mgo.Collection
+var MongoClient *mongo.Client
+var CommentsCollection *mongo.Collection
 
-func InitMgo() {
-	session, err := mgo.Dial("mongodb://admin:123456localhost:27017")
+func InitMongo(url string) {
+	//常见mongodb客户端
+	MongoClient, err := mongo.NewClient(options.Client().ApplyURI(url).SetAuth(options.Credential{
+		Username:   "admin",
+		Password:   "123456",
+		AuthSource: "admin",
+	}))
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	defer session.Close()
-
-	db := session.DB("blogdb")
-	// users := db.C("users")
-	Comments = db.C("comments")
-	// // 插入新用户
-	// user := User{
-	// 	ID:       bson.NewObjectId(),
-	// 	Name:     "Alice",
-	// 	Email:    "alice@example.com",
-	// 	Password: "password",
-	// }
-	// err = users.Insert(user)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// // 查询所有用户
-	// var allUsers []User
-	// err = users.Find(nil).All(&allUsers)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println(allUsers)
-
-	// // 查询指定用户
-	// var oneUser User
-	// err = users.Find(bson.M{"email": "alice@example.com"}).One(&oneUser)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println(oneUser)
-
-	// // 更新用户信息
-	// err = users.Update(bson.M{"email": "alice@example.com"}, bson.M{"$set": bson.M{"name": "Bob"}})
-	// if err != nil {
-	// 	panic(err)
-	// }
+	//连接mongodb
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err = MongoClient.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//检查是否连接成功
+	err = MongoClient.Ping(context.Background(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//获取comments集合
+	CommentsCollection = MongoClient.Database("blogdb").Collection("comments")
 }
 func InitRedis(addr string, pwd string) {
 	RedisClient = redis.NewClient(&redis.Options{
@@ -94,5 +78,5 @@ func InitBlogMysql(connString string) error {
 	return nil
 }
 func migration() {
-	DB.AutoMigrate(&UserInfo{}, &Article{}, &Catagory{})
+	DB.AutoMigrate(&UserInfo{}, &Article{}, &Catagory{}, &UserLike{})
 }

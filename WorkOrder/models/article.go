@@ -12,6 +12,7 @@ type Article struct {
 	Content     string
 	Author      string
 	Cataid      uint
+	Likes       int
 	PublishDate time.Time
 }
 

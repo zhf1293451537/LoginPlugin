@@ -49,6 +49,8 @@ func Init() {
 	fmt.Println("用户信息数据库mysql连接")
 	models.InitBlogMysql("root:123456@/userinfo?charset=utf8&parseTime=True&loc=Local")
 
+	fmt.Println("mongoDB连接")
+	models.InitMongo("mongodb://127.0.0.1:27017")
 	// err := models.Database("")
 	// if err != nil {
 	// 	fmt.Println("数据库连接失败")

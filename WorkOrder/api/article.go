@@ -1,6 +1,7 @@
 package api
 
 import (
+	"WorkOrder/middlewares"
 	"WorkOrder/models"
 	"fmt"
 	"log"
@@ -32,6 +33,7 @@ func ArtPost(c *gin.Context) {
 		Content:     content,
 		Author:      author,
 		Cataid:      cataid,
+		Likes:       0,
 		PublishDate: time.Now(),
 	}
 	err = article.Create()
@@ -248,4 +250,48 @@ func CataEdit(c *gin.Context) {
 		"msg": "cata edit success",
 	})
 
+}
+
+//点赞
+func ArtLike(c *gin.Context) {
+	articleID := c.Param("id")
+	//获取username
+	token := c.Request.Header.Get("jwt")
+	myinfo, err := middlewares.ParseToken(token)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"err": err,
+			"msg": "token parse error",
+		})
+		return
+	}
+	username := myinfo.UserName
+	//文章不存在时是否需要返回id不存在错误？ 文章不存在，列表中也不会显示，也不会用到点赞等功能 所以暂时不需要
+
+	//只有没点过赞的情况下才可以点赞
+	userlike := &models.UserLike{}
+	err = models.DB.Table("user_likes").Where("user_name = ?", username).Where("article_id = ?", articleID).First(userlike).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "database error" + err.Error()})
+		return
+	}
+	//点过赞才可以执行以下
+	err = models.DB.Table("articles").Where("id = ?", articleID).UpdateColumn("likes", gorm.Expr("likes + ?", 1)).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "database error" + err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"msg": "likes + 1 success"})
+}
+
+//取消点赞
+func DisArtLike(c *gin.Context) {
+	articleID := c.Param("id")
+	//文章点赞量是否可以小于0？只有点赞后才可以取消点赞
+	err := models.DB.Table("articles").Where("id = ?", articleID).UpdateColumn("likes", gorm.Expr("likes - ?", 1)).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "database error" + err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"msg": "likes - 1 success"})
 }
