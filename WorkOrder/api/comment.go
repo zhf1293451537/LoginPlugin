@@ -71,6 +71,7 @@ func CreateComment(c *gin.Context) {
 }
 
 func GetComments(c *gin.Context) {
+	//获取文章id
 	articleID := c.Param("id")
 	objectIDStr := articleID + strings.Repeat("0", (24-len(articleID)))
 	objectID, err := primitive.ObjectIDFromHex(objectIDStr)
@@ -78,8 +79,19 @@ func GetComments(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"err": "Invalid article ID"})
 		return
 	}
+	//获取parentid
+	parentIDStr := c.Query("parent_id")
+	var parentID *primitive.ObjectID
+	if parentIDStr != "" {
+		parentIDValue, err := primitive.ObjectIDFromHex(parentIDStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"err": "Invalid parent ID"})
+			return
+		}
+		parentID = &parentIDValue
+	}
 	//从mongodb中查询文章所有评论
-	cursor, err := models.CommentsCollection.Find(context.Background(), bson.M{"article_id": objectID})
+	cursor, err := models.CommentsCollection.Find(context.Background(), bson.M{"article_id": objectID, "parent_id": parentID})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return

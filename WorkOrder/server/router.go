@@ -18,7 +18,7 @@ var src = map[string]func(*gin.Engine) *gin.RouterGroup{
 
 func NewRouter() *gin.Engine {
 	r := gin.Default()
-	r.LoadHTMLGlob("template/*")
+	r.LoadHTMLGlob("template/**/*")
 	// r.Static("/static", "./static")
 	// r.GET("/test", api.Test)
 	//登陆界面

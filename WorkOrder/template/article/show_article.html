@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>查看文章</title>
+  </head>
+  <body>
+    <h1>查看文章</h1>
+      <div>
+        <!-- <label for="title"></label> -->
+        <h3 type="text" id="title" name="title">标题:{{.article.Title}}</h3>
+      </div>
+      <div>
+        <!-- <label for="cata"></label> -->
+        <h3 type="text" id="cata" name="cata">分类:{{.name}}</h3>
+      </div>
+      <div>
+        <!-- <label for="content"></label> -->
+        <h4 id="content" name="content">内容:{{.article.Content}}</h4>
+      </div>
+      <div>
+        <!-- <label for="author"></label> -->
+        <h3 type="text" id="author" name="author" >作者:{{.article.Author}}</h3>
+      </div>
+      <div>
+        <!-- <label for="like"></label> -->
+        <h3 type="text" id="like" name="like" >Likes:{{.article.Likes}}</h3>
+      </div>
+      <form method="GET" action="/articles/{{.article.ID}}/edit">
+        <button type="submit">编辑</button>
+      </form>
+  </body>
+</html>

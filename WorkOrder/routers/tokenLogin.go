@@ -32,8 +32,10 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 		//博客发布
 		u.POST("/articles/create", api.ArtPost)
 		//博客查看
-		u.GET("/articles/:id/edit", api.ArtGet)
-		//博客编辑
+		u.GET("/articles/:id", api.ArtGet)
+		//博客编辑页面
+		u.GET("/articles/:id/edit", api.ArtEdit)
+		//博客编辑提交
 		u.POST("/articles/:id/edit", api.ArtFix)
 		//博客删除
 		u.POST("/articles/:id/delete", api.ArtDelete)
@@ -67,22 +69,29 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 		u.DELETE("/articles/:id/likes", api.DisArtLike)
 		//管理员后台管理功能
 
-		/*
-			2. 高级功能
-			* 博客文章的分享功能
-			* 博客文章的推荐功能
-			* 博客文章的归档功能
-			* 博客文章的订阅功能
-			* 博客文章的定时发布功能
-			* 博客文章的热门排行功能
-			* 博客文章的阅读统计功能
-			* 博客文章的相关推荐功能
-			3. 可选功能
-			* 第三方登录功能，例如使用GitHub、Google、微信等账号进行登录
-			* 多语言支持功能，例如支持中文、英文、日文等语言
-			* 主题切换功能，例如支持多种主题风格
-			* 邮件通知功能，例如评论回复、订阅更新等邮件通知
-		*/
+		// 2. 高级功能
+		// * 博客文章的分享功能
+
+		// * 博客文章的推荐功能
+
+		// * 博客文章的归档功能
+
+		// * 博客文章的订阅功能
+
+		// * 博客文章的定时发布功能
+
+		// * 博客文章的热门排行功能
+
+		// * 博客文章的阅读统计功能
+
+		// * 博客文章的相关推荐功能
+
+		// 3. 可选功能
+		// * 第三方登录功能，例如使用GitHub、Google、微信等账号进行登录
+		// * 多语言支持功能，例如支持中文、英文、日文等语言
+		// * 主题切换功能，例如支持多种主题风格
+		// * 邮件通知功能，例如评论回复、订阅更新等邮件通知
+
 	}
 	return u
 }

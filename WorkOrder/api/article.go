@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -53,7 +54,38 @@ func ArtPost(c *gin.Context) {
 	})
 	// c.Redirect(http.StatusFound, "/articles")
 }
+
+//博客查看
 func ArtGet(c *gin.Context) {
+	id := c.Param("id")
+	article, err := models.GetArticleByID(id)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"msg": "article database select error",
+			"err": err,
+		})
+		// 	c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	cataname, err := models.GetCataByID(fmt.Sprint(article.Cataid))
+	if err == gorm.ErrRecordNotFound {
+		cataname = "分类已被删除请修改分类"
+	} else if err != nil {
+		c.JSON(500, gin.H{
+			"msg": "cataname database select error",
+			"err": err,
+		})
+		// 	c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	c.HTML(http.StatusOK, "show_article.html", gin.H{
+		"article": article,
+		"name":    cataname,
+	})
+}
+
+//博客编辑页面
+func ArtEdit(c *gin.Context) {
 	id := c.Param("id")
 	article, err := models.GetArticleByID(id)
 	if err != nil {
@@ -271,26 +303,67 @@ func ArtLike(c *gin.Context) {
 	//只有没点过赞的情况下才可以点赞
 	userlike := &models.UserLike{}
 	err = models.DB.Table("user_likes").Where("user_name = ?", username).Where("article_id = ?", articleID).First(userlike).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "database error" + err.Error()})
+	if err == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "user has likes"})
+		return
+	} else if err != nil && err != gorm.ErrRecordNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "database error"})
 		return
 	}
-	//点过赞才可以执行以下
+	//没点过赞才可以执行以下
 	err = models.DB.Table("articles").Where("id = ?", articleID).UpdateColumn("likes", gorm.Expr("likes + ?", 1)).Error
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "database error" + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "database error"})
 		return
 	}
+	uintVal, err := strconv.ParseUint(articleID, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "uintVal error"})
+		return
+	}
+	// 在user_likes中创建记录
+	ul := &models.UserLike{
+		UserName:  username,
+		ArticleID: uint(uintVal),
+	}
+	models.DB.Create(ul)
 	c.JSON(http.StatusOK, gin.H{"msg": "likes + 1 success"})
 }
 
 //取消点赞
 func DisArtLike(c *gin.Context) {
 	articleID := c.Param("id")
-	//文章点赞量是否可以小于0？只有点赞后才可以取消点赞
-	err := models.DB.Table("articles").Where("id = ?", articleID).UpdateColumn("likes", gorm.Expr("likes - ?", 1)).Error
+	//获取username
+	token := c.Request.Header.Get("jwt")
+	myinfo, err := middlewares.ParseToken(token)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"err": "database error" + err.Error()})
+		c.JSON(500, gin.H{
+			"err": err,
+			"msg": "token parse error",
+		})
+		return
+	}
+	username := myinfo.UserName
+	//只有点过赞才能取消点赞
+	userlike := &models.UserLike{}
+	err = models.DB.Table("user_likes").Where("user_name = ?", username).Where("article_id = ?", articleID).First(userlike).Error
+	if err == gorm.ErrRecordNotFound {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "user not likes"})
+		return
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "database error"})
+		return
+	}
+	//文章点赞量是否可以小于0？只有点赞后才可以取消点赞
+	err = models.DB.Table("articles").Where("id = ?", articleID).UpdateColumn("likes", gorm.Expr("likes - ?", 1)).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "database error"})
+		return
+	}
+	//删除user_likes 表中的记录
+	err = models.DB.Table("user_likes").Where("user_name = ?", username).Where("article_id = ?", articleID).Delete(&models.UserLike{}).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": "database error"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"msg": "likes - 1 success"})
