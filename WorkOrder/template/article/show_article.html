@@ -29,5 +29,19 @@
       <form method="GET" action="/articles/{{.article.ID}}/edit">
         <button type="submit">编辑</button>
       </form>
+      <button id="share">分享</button>
   </body>
 </html>
+<script>
+const copyButton = document.getElementById('share');
+copyButton.addEventListener('click', () => {
+  const currentUrl = window.location.href;
+  navigator.clipboard.writeText(currentUrl)
+    .then(() => {
+      alert('网址已复制到剪切板');
+    })
+    .catch((error) => {
+      console.error('无法复制网址:', error);
+    });
+});
+</script>

@@ -71,20 +71,23 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 
 		// 2. 高级功能
 		// * 博客文章的分享功能
-
-		// * 博客文章的推荐功能
+		//暂时加到文章查看中，以复制链接实现，后续考虑其他实现
 
 		// * 博客文章的归档功能
-
+		u.GET("articles//archives", api.GetArchive)
 		// * 博客文章的订阅功能
 
 		// * 博客文章的定时发布功能
-
+		// 时间设定好之后更新publish的时间
+		u.POST("/articles/createbytime", api.ArtPostByTime)
 		// * 博客文章的热门排行功能
+		//根据likes排名
 
 		// * 博客文章的阅读统计功能
+		//根据当前页面浏览时间合格的数量
 
 		// * 博客文章的相关推荐功能
+		//根据分类和title相似
 
 		// 3. 可选功能
 		// * 第三方登录功能，例如使用GitHub、Google、微信等账号进行登录

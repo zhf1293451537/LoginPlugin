@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>归档</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        h1 {text-align: center;}
+        h2 {margin-top: 20px;}
+        ul {list-style-type: none;
+            padding-left: 0;}
+        li {margin-top: 10px;}
+    </style>
+</head>
+<body>
+    <h1>归档</h1>
+
+    {{ range $key,$value := .ArchiveMap }}
+        <h2>{{ $key }}</h2>
+        <ul>
+            {{ range $value }}
+                <li><a href="#">{{ .Title }}</a></li>
+            {{ end }}
+        </ul>
+    {{ end }}
+</body>
+</html>

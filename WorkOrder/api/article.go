@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 
@@ -35,7 +36,7 @@ func ArtPost(c *gin.Context) {
 		Author:      author,
 		Cataid:      cataid,
 		Likes:       0,
-		PublishDate: time.Now(),
+		PublishDate: time.Date(2023, 2, 4, 0, 0, 0, 0, time.UTC),
 	}
 	err = article.Create()
 	if err != nil {
@@ -367,4 +368,82 @@ func DisArtLike(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"msg": "likes - 1 success"})
+}
+
+//获取文章归档
+func GetArchive(c *gin.Context) {
+	articles, err := models.GetArticleByArchive()
+	if err != nil {
+		c.JSON(500, gin.H{
+			"msg": "list get error",
+			"err": err,
+		})
+		// c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	//对日期进行排序
+	sort.Slice(articles, func(i, j int) bool {
+		return articles[i].PublishDate.After(articles[j].PublishDate)
+	})
+	archiveMap := make(map[string][]*models.Article)
+	for _, article := range articles {
+		key := article.PublishDate.Format("2006-01")
+		archiveMap[key] = append(archiveMap[key], article)
+	}
+	c.HTML(http.StatusOK, "archives.html", gin.H{"ArchiveMap": archiveMap})
+}
+
+func ArtPostByTime(c *gin.Context) {
+	// 从表单中获取文章数据
+	title := c.PostForm("title")
+	content := c.PostForm("content")
+	author := c.PostForm("author")
+	pubtime := c.PostForm("publishtime")
+	if pubtime == "" {
+		//没有设定时间时
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "Not Set Publish Time",
+		})
+		return
+	}
+	publishtime, _ := strconv.Atoi(pubtime)
+
+	cata := c.PostForm("catagory")
+	cataid, err := models.GetCataId(cata)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"err": err,
+			"msg": "cataid get error",
+		})
+		// c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// 创建新文章
+	article := models.Article{
+		Title:       title,
+		Content:     content,
+		Author:      author,
+		Cataid:      cataid,
+		Likes:       0,
+		PublishDate: time.Unix(int64(publishtime), int64(0)),
+	}
+	//将article加入队列
+
+	log.Println(article)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"err": err,
+			"msg": "article create error",
+		})
+		// c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	// log.Println(article)
+	// 重定向到文章列表页面
+	c.JSON(200, gin.H{
+		"msg": "article by time create success",
+	})
+	log.Println("重定向到文章列表页面")
+	// c.Redirect(http.StatusFound, "/articles")
 }
