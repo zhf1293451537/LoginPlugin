@@ -48,6 +48,8 @@ func UserRegis(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"msg": "user register success",
 	})
+	//重定向到登录页面
+	// c.Redirect(http.StatusTemporaryRedirect,"/login")
 }
 func Cookielogin(c *gin.Context) {
 	//前段md5加密密码发送后端

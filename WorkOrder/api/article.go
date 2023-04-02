@@ -56,7 +56,7 @@ func ArtPost(c *gin.Context) {
 	// c.Redirect(http.StatusFound, "/articles")
 }
 
-//博客查看
+// 博客查看
 func ArtGet(c *gin.Context) {
 	id := c.Param("id")
 	article, err := models.GetArticleByID(id)
@@ -85,7 +85,7 @@ func ArtGet(c *gin.Context) {
 	})
 }
 
-//博客编辑页面
+// 博客编辑页面
 func ArtEdit(c *gin.Context) {
 	id := c.Param("id")
 	article, err := models.GetArticleByID(id)
@@ -285,7 +285,7 @@ func CataEdit(c *gin.Context) {
 
 }
 
-//点赞
+// 点赞
 func ArtLike(c *gin.Context) {
 	articleID := c.Param("id")
 	//获取username
@@ -331,7 +331,7 @@ func ArtLike(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "likes + 1 success"})
 }
 
-//取消点赞
+// 取消点赞
 func DisArtLike(c *gin.Context) {
 	articleID := c.Param("id")
 	//获取username
@@ -370,7 +370,7 @@ func DisArtLike(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "likes - 1 success"})
 }
 
-//获取文章归档
+// 获取文章归档
 func GetArchive(c *gin.Context) {
 	articles, err := models.GetArticleByArchive()
 	if err != nil {
@@ -429,16 +429,23 @@ func ArtPostByTime(c *gin.Context) {
 		PublishDate: time.Unix(int64(publishtime), int64(0)),
 	}
 	//将article加入队列
-
+	//可以使用time.AfterFunc 计时器但是高并发时消耗资源过多
+	/*
+		或者
+		可以使用一个定时器来每秒钟触发一次，然后在定时器触发时检查需要执行的任务并执行它们。
+		这样可以减少计时器堆的大小，并且可以更好地控制任务的执行时间。
+	*/
 	log.Println(article)
-	if err != nil {
-		c.JSON(500, gin.H{
-			"err": err,
-			"msg": "article create error",
-		})
-		// c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
+	time.AfterFunc(time.Until(article.PublishDate), func() {
+		err := article.Create()
+		if err != nil {
+			c.JSON(500, gin.H{
+				"err": err,
+				"msg": "article create error",
+			})
+			return
+		}
+	})
 	// log.Println(article)
 	// 重定向到文章列表页面
 	c.JSON(200, gin.H{
@@ -446,4 +453,21 @@ func ArtPostByTime(c *gin.Context) {
 	})
 	log.Println("重定向到文章列表页面")
 	// c.Redirect(http.StatusFound, "/articles")
+}
+
+// articles rank by star
+func ArtRank(c *gin.Context) {
+	articles, err := models.GetArticleListByLike()
+	if err != nil {
+		c.JSON(500, gin.H{
+			"msg": "list get error",
+			"err": err,
+		})
+		// c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	sort.Slice(articles, func(i, j int) bool { return articles[i].Likes > articles[j].Likes })
+	c.HTML(http.StatusOK, "article_rank_list.html", gin.H{
+		"articles": articles,
+	})
 }

@@ -82,7 +82,7 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 		u.POST("/articles/createbytime", api.ArtPostByTime)
 		// * 博客文章的热门排行功能
 		//根据likes排名
-
+		u.GET("/articles/rankbystar", api.ArtRank)
 		// * 博客文章的阅读统计功能
 		//根据当前页面浏览时间合格的数量
 

@@ -58,6 +58,14 @@ func GetArticleList() ([]*Article, error) {
 	return result, nil
 }
 
+func GetArticleListByLike() ([]*Article, error) {
+	result := []*Article{}
+	err := DB.Table("articles").Select("id,title,content,author,likes").Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
 func GetArticleListByCata(cataid string) ([]*Article, error) {
 	result := []*Article{}
 	err := DB.Table("articles").Where("cataid = ?", cataid).Select("id,title,content,author").Find(&result).Error
