@@ -1,7 +1,7 @@
 package router
 
 import (
-	api "WorkOrder/api"
+	"WorkOrder/api"
 	"WorkOrder/middlewares"
 
 	"github.com/gin-gonic/gin"

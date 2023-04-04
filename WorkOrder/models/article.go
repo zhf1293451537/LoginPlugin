@@ -13,6 +13,7 @@ type Article struct {
 	Author      string
 	Cataid      uint
 	Likes       int
+	Views       int
 	PublishDate time.Time
 }
 
@@ -31,6 +32,10 @@ func GetArticleByID(id string) (*Article, error) {
 	if result.Error != nil {
 		return nil, result.Error
 	}
+	err := DB.Table("articles").Where("id = ?", id).UpdateColumn("views", gorm.Expr("views + ?", 1)).Error
+	if err != nil {
+		return nil, err
+	}
 	return art, nil
 }
 
@@ -41,6 +46,7 @@ func (a *Article) UpdateById(id string) error {
 	}
 	return nil
 }
+
 func DeleteArticle(id string) error {
 	err := DB.Table("articles").Where("id = ?", id).Delete(&Article{}).Error
 	if err != nil {
@@ -82,4 +88,32 @@ func GetArticleByArchive() ([]*Article, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+//获取文章阅读量表
+func GetArticleByViews() ([]*Article, error) {
+	result := []*Article{}
+	err := DB.Table("articles").Select("id,title,author,views").Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func GetArtTitleById(articleID string) (string, error) {
+	art := &Article{}
+	err := DB.Table("articles").Where("id = ?", articleID).Select("title").Find(&art).Error
+	if err != nil {
+		return "", err
+	}
+	return art.Title, nil
+}
+
+func GetTitleCataidById(articleID string) (string, uint, error) {
+	art := &Article{}
+	err := DB.Table("articles").Where("id = ?", articleID).Select("title,cataid").Find(&art).Error
+	if err != nil {
+		return "", 0, err
+	}
+	return art.Title, art.Cataid, nil
 }

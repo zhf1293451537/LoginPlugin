@@ -19,9 +19,11 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
 <script>
+  const  id= searchParams.get('id');
+
   function getComments(parentID) {
     $.ajax({
-      url: "/comments",
+      url: "/v3/articles/"+id+"/comments",
       data: {
         parent_id: parentID
       },
@@ -47,13 +49,12 @@
       }
     });
   }
-
   $("#comment-list").append(getComments(null));
 
   $("#comment-form").submit(function(event) {
     event.preventDefault();
     $.ajax({
-      url: "/comments",
+      url: "/v3/articles/"+id+"/comments",
       method: "POST",
       contentType: "application/json",
       data: JSON.stringify({

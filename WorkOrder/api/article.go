@@ -36,6 +36,7 @@ func ArtPost(c *gin.Context) {
 		Author:      author,
 		Cataid:      cataid,
 		Likes:       0,
+		Views:       0,
 		PublishDate: time.Date(2023, 2, 4, 0, 0, 0, 0, time.UTC),
 	}
 	err = article.Create()
@@ -398,15 +399,23 @@ func ArtPostByTime(c *gin.Context) {
 	title := c.PostForm("title")
 	content := c.PostForm("content")
 	author := c.PostForm("author")
-	pubtime := c.PostForm("publishtime")
-	if pubtime == "" {
+	timestampStr := c.PostForm("publishtime")
+	log.Println(timestampStr)
+	if timestampStr == "" {
 		//没有设定时间时
 		c.JSON(http.StatusBadRequest, gin.H{
 			"msg": "Not Set Publish Time",
 		})
 		return
 	}
-	publishtime, _ := strconv.Atoi(pubtime)
+	timestamp, err := strconv.ParseInt(timestampStr, 10, 64)
+	if err != nil {
+		// 处理错误
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "Publish Time convert int64 error",
+		})
+		return
+	}
 
 	cata := c.PostForm("catagory")
 	cataid, err := models.GetCataId(cata)
@@ -426,8 +435,9 @@ func ArtPostByTime(c *gin.Context) {
 		Author:      author,
 		Cataid:      cataid,
 		Likes:       0,
-		PublishDate: time.Unix(int64(publishtime), int64(0)),
+		PublishDate: time.Unix(0, timestamp*int64(time.Millisecond)),
 	}
+
 	//将article加入队列
 	//可以使用time.AfterFunc 计时器但是高并发时消耗资源过多
 	/*
@@ -470,4 +480,55 @@ func ArtRank(c *gin.Context) {
 	c.HTML(http.StatusOK, "article_rank_list.html", gin.H{
 		"articles": articles,
 	})
+}
+
+//阅读统计功能
+func GetReadTime(c *gin.Context) {
+	articles, err := models.GetArticleByViews()
+	if err != nil {
+		c.JSON(500, gin.H{
+			"msg": "list get error",
+			"err": err,
+		})
+		// c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	sort.Slice(articles, func(i, j int) bool { return articles[i].Views > articles[j].Views })
+	c.HTML(http.StatusOK, "article_read.html", gin.H{
+		"articles": articles,
+	})
+}
+
+//相似文章推荐
+func SimilarArticlesHandler(c *gin.Context) {
+	articleID := c.Param("id")
+	_, cataid, err := models.GetTitleCataidById(articleID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	articles := &[]models.Article{}
+	if err := models.DB.Where("cataid = ?", cataid).Find(articles).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.HTML(http.StatusOK, "show_similar_article.html", gin.H{"art": articles})
+}
+
+//获取用户浏览记录
+func GetRecord(c *gin.Context) {
+	token := c.Request.Header.Get("jwt")
+	MyClaim, err := middlewares.ParseToken(token)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "Token is fail"})
+		return
+	}
+	userID := MyClaim.UserName
+	recordList, err := models.GetRecordList(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": "history database is fail"})
+		return
+	}
+	sort.Slice(recordList, func(i, j int) bool { return recordList[i].RecordTime.After(recordList[j].RecordTime) })
+	c.HTML(http.StatusOK, "show_record.html", gin.H{"history": recordList})
 }

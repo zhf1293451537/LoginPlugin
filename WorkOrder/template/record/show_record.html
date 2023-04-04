@@ -1,0 +1,8 @@
+<ul>
+    {{ range .history }}
+    <li>
+        <a href="/articles/{{ .ArticleID }}">{{ .Title }}</a>
+        <span class="time">{{ .RecordTime }}</span>
+    </li>
+    {{ end }}
+</ul>

@@ -22,9 +22,9 @@
             <td>{{.Title}}</td>
             <td>{{.Author}}</td>
             <td>
-              <a href="/articles/{{.ID}}/edit">查看</a>
-              <a href="/articles/{{.ID}}/edit">编辑</a>
-              <form method="POST" action="/articles/{{.ID}}/delete" style="display: inline;">
+              <a href="/v3/articles/{{.ID}}/edit">查看</a>
+              <a href="/v3/articles/{{.ID}}/edit">编辑</a>
+              <form method="POST" action="/v3/articles/{{.ID}}/delete" style="display: inline;">
                 <button type="submit" class="btn btn-link">删除</button>
               </form>
             </td>

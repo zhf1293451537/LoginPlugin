@@ -26,7 +26,7 @@
         <!-- <label for="like"></label> -->
         <h3 type="text" id="like" name="like" >Likes:{{.article.Likes}}</h3>
       </div>
-      <form method="GET" action="/articles/{{.article.ID}}/edit">
+      <form method="GET" action="/v3/articles/{{.article.ID}}/edit">
         <button type="submit">编辑</button>
       </form>
       <button id="share">分享</button>

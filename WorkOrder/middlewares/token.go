@@ -30,6 +30,7 @@ func GenerateToken(username string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, cla)
 	return token.SignedString(Secret)
 }
+
 func ParseToken(tokenString string) (*MyClaim, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &MyClaim{}, func(t *jwt.Token) (interface{}, error) {
 		return Secret, nil
@@ -42,6 +43,7 @@ func ParseToken(tokenString string) (*MyClaim, error) {
 	}
 	return nil, errors.New("invalid token")
 }
+
 func AuthToken() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.Request.Header.Get("jwt")

@@ -32,7 +32,7 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 		//博客发布
 		u.POST("/articles/create", api.ArtPost)
 		//博客查看
-		u.GET("/articles/:id", api.ArtGet)
+		u.GET("/articles/:id", middlewares.RecordHistory(), api.ArtGet)
 		//博客编辑页面
 		u.GET("/articles/:id/edit", api.ArtEdit)
 		//博客编辑提交
@@ -85,9 +85,13 @@ func TokenRouter(r *gin.Engine) *gin.RouterGroup {
 		u.GET("/articles/rankbystar", api.ArtRank)
 		// * 博客文章的阅读统计功能
 		//根据当前页面浏览时间合格的数量
-
+		u.GET("/articles/readtime", api.GetReadTime)
 		// * 博客文章的相关推荐功能
 		//根据分类和title相似
+		u.GET("/articles/:id/similar", api.SimilarArticlesHandler)
+
+		//用户浏览记录
+		u.GET("/recordhistory", api.GetRecord)
 
 		// 3. 可选功能
 		// * 第三方登录功能，例如使用GitHub、Google、微信等账号进行登录

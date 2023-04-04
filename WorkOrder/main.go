@@ -8,8 +8,6 @@ import (
 func main() {
 	//配置文件初始化以及数据库的连接
 	conf.Init()
-	//
-	// log.Println(time.Now().Add(time.Second * 60).Unix())
 	//装载路由
 	r := server.NewRouter()
 

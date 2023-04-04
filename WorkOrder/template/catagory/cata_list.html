@@ -21,8 +21,8 @@
             <td>{{.ID}}</td>
             <td>{{.Name}}</td>
             <td>
-              <a href="/articles/list/{{.ID}}/edit">编辑</a>
-              <form method="POST" action="/articles/list/{{.ID}}/delete" style="display: inline;">
+              <a href="/v3/articles/cata/{{.ID}}/edit">编辑</a>
+              <form method="POST" action="/v3/articles/cata/{{.ID}}/delete" style="display: inline;">
                 <button type="submit" class="btn btn-link">删除</button>
               </form>
             </td>
@@ -30,7 +30,7 @@
           {{end}}
         </tbody>
       </table>
-      <a href="/articles/create" class="btn btn-primary">新建分类</a>
+      <a href="/v3/articles/cata/create" class="btn btn-primary">新建分类</a>
     </div>
   </body>
 </html>

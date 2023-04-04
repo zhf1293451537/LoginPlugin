@@ -6,7 +6,7 @@
   </head>
   <body>
     <h1>编辑文章</h1>
-    <form method="POST" action="/articles/{{.article.ID}}/edit">
+    <form method="POST" action="/v3/articles/{{.article.ID}}/edit">
       <div>
         <label for="title">标题：</label>
         <input type="text" id="title" name="title" value="{{.article.Title}}">
@@ -29,7 +29,7 @@
       </div>
       <button type="submit">保存</button>
     </form>
-    <form method="POST" action="/articles/{{.article.ID}}/delete">
+    <form method="POST" action="/v3/articles/{{.article.ID}}/delete">
       <button type="submit">删除</button>
     </form>
   </body>
